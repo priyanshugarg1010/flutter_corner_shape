@@ -1,0 +1,39 @@
+# Example app platform folders (pub.dev only needs example/lib/main.dart)
+example/android/
+example/ios/
+example/web/
+example/linux/
+example/macos/
+example/windows/
+
+# Build artifacts
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# IDE configs
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Test coverage
+coverage/
+
+# Doc generation
+doc/
+
+# OS junk
+.DS_Store
+*.swp
+
+# Git & CI
+.git/
+.github/
+.gitignore
+
+# Misc
+*.log
+pubspec.lock

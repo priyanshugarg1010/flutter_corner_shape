@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1
+
+### Changed
+
+- Added `.pubignore` to exclude example platform folders, IDE configs, build artifacts, and documentation scripts from the published package, reducing the published package size.
+
 ## 0.1.0
 
 Initial release of `flutter_corner_shape` — CSS `corner-shape` for Flutter.
