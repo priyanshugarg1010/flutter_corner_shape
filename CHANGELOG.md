@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2
+
+### Updated
+
+- Updated the correct url for the home page and repository
+
 ## 0.1.1
 
 ### Changed
