@@ -3,16 +3,16 @@
 CSS `corner-shape` for Flutter. Round, scoop, bevel, notch, squircle, and superellipse corners — with per-corner control, smooth animations, and drop-in `ShapeBorder` + `Clipper` widgets.
 
 ## Examples
-<table>
-  <tr>
-    <td><img src="assets/keyword_values.png" width="100%"/></td>
-    <td><img src="assets/morph.gif" width="100%"/></td>
-  </tr>
-  <tr>
-    <td><img src="assets/corner_clip.png" width="100%"/></td>
-    <td><img src="assets/per_corner.png" width="100%"/></td>
-  </tr>
-</table>
+
+<p align="center">
+  <img src="assets/keyword_values.png" width="45%"/>
+  <img src="assets/morph.gif" width="45%"/>
+</p>
+
+<p align="center">
+  <img src="assets/per_corner.png" width="45%"/>
+  <img src="assets/corner_clip.png" width="45%"/>
+</p>
 
 ## Why?
 
@@ -158,43 +158,43 @@ Container(
 
 ## CSS ↔ Dart Mapping
 
-| CSS                                       | Dart                                               |
-|-------------------------------------------|-----------------------------------------------------|
-| `corner-shape: round`                     | `CornerShapeSpec.round`                             |
-| `corner-shape: squircle`                  | `CornerShapeSpec.squircle`                          |
-| `corner-shape: bevel`                     | `CornerShapeSpec.bevel`                             |
-| `corner-shape: scoop`                     | `CornerShapeSpec.scoop`                             |
-| `corner-shape: notch`                     | `CornerShapeSpec.notch`                             |
-| `corner-shape: square`                    | `CornerShapeSpec.square`                            |
-| `corner-shape: superellipse(-1.5)`        | `CornerShapeSpec.all(CornerShapeValue.superellipse(-1.5))` |
-| `corner-shape: round scoop bevel notch`   | `CornerShapeSpec.only(topLeft: .round, topRight: .scoop, ...)` |
-| `border-radius: 30px`                     | `BorderRadius.circular(30)`                         |
+| CSS                                     | Dart                                                           |
+| --------------------------------------- | -------------------------------------------------------------- |
+| `corner-shape: round`                   | `CornerShapeSpec.round`                                        |
+| `corner-shape: squircle`                | `CornerShapeSpec.squircle`                                     |
+| `corner-shape: bevel`                   | `CornerShapeSpec.bevel`                                        |
+| `corner-shape: scoop`                   | `CornerShapeSpec.scoop`                                        |
+| `corner-shape: notch`                   | `CornerShapeSpec.notch`                                        |
+| `corner-shape: square`                  | `CornerShapeSpec.square`                                       |
+| `corner-shape: superellipse(-1.5)`      | `CornerShapeSpec.all(CornerShapeValue.superellipse(-1.5))`     |
+| `corner-shape: round scoop bevel notch` | `CornerShapeSpec.only(topLeft: .round, topRight: .scoop, ...)` |
+| `border-radius: 30px`                   | `BorderRadius.circular(30)`                                    |
 
 ## Superellipse Value Spectrum
 
-| K Value | Keyword    | Visual Effect                |
-|---------|------------|------------------------------|
-| +∞      | `square`   | Sharp 90° corner             |
-| 3       | —          | Very subtle rounding         |
-| 2       | `squircle` | iOS-style smooth curve       |
-| 1       | `round`    | Standard circular arc        |
-| 0.5     | —          | Extra-rounded outward        |
-| 0       | `bevel`    | Straight diagonal line       |
-| -0.5    | —          | Slight inward curve          |
-| -1      | `scoop`    | Concave circular arc         |
-| -∞      | `notch`    | 90° inward square cut        |
+| K Value | Keyword    | Visual Effect          |
+| ------- | ---------- | ---------------------- |
+| +∞      | `square`   | Sharp 90° corner       |
+| 3       | —          | Very subtle rounding   |
+| 2       | `squircle` | iOS-style smooth curve |
+| 1       | `round`    | Standard circular arc  |
+| 0.5     | —          | Extra-rounded outward  |
+| 0       | `bevel`    | Straight diagonal line |
+| -0.5    | —          | Slight inward curve    |
+| -1      | `scoop`    | Concave circular arc   |
+| -∞      | `notch`    | 90° inward square cut  |
 
 ## API Overview
 
-| Class                    | Purpose                                              |
-|--------------------------|------------------------------------------------------|
-| `CornerShapeValue`       | Single corner's shape (keyword or `superellipse(K)`) |
-| `CornerShapeSpec`        | All 4 corners' shapes (like CSS shorthand)           |
-| `CornerShapeBorder`      | `ShapeBorder` — use with `ShapeDecoration`, `Material` |
-| `ClipCornerShape`        | Clip widget — like `ClipRRect` with corner shapes    |
-| `CornerShapeDecoration`  | Convenience `Decoration` (color + shape + shadows)   |
-| `CornerShapeSpecTween`   | `Tween` for animating between shapes                 |
-| `CornerShapeType`        | Enum of keyword values                               |
+| Class                   | Purpose                                                |
+| ----------------------- | ------------------------------------------------------ |
+| `CornerShapeValue`      | Single corner's shape (keyword or `superellipse(K)`)   |
+| `CornerShapeSpec`       | All 4 corners' shapes (like CSS shorthand)             |
+| `CornerShapeBorder`     | `ShapeBorder` — use with `ShapeDecoration`, `Material` |
+| `ClipCornerShape`       | Clip widget — like `ClipRRect` with corner shapes      |
+| `CornerShapeDecoration` | Convenience `Decoration` (color + shape + shadows)     |
+| `CornerShapeSpecTween`  | `Tween` for animating between shapes                   |
+| `CornerShapeType`       | Enum of keyword values                                 |
 
 ## How It Works
 
