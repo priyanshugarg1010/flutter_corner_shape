@@ -5,19 +5,19 @@ CSS `corner-shape` for Flutter. Round, scoop, bevel, notch, squircle, and supere
 ## Examples
 
 <div> 
-    <img src="https://github.com/priyanshugarg1010/flutter_corner_shape/blob/main/assets/keyword_values.png" width="450">
+    <img src="https://github.com/priyanshugarg1010/flutter_corner_shape/blob/main/assets/keyword_values.png?raw=true" width="450">
 </div>
 
 <div> 
-    <img src="https://github.com/priyanshugarg1010/flutter_corner_shape/blob/main/assets/morph.gif" width="450">
+    <img src="https://github.com/priyanshugarg1010/flutter_corner_shape/blob/main/assets/morph.gif?raw=true" width="450">
 </div>
 
 <div> 
-    <img src="https://github.com/priyanshugarg1010/flutter_corner_shape/blob/main/assets/corner_clip.png" width="450">
+    <img src="https://github.com/priyanshugarg1010/flutter_corner_shape/blob/main/assets/corner_clip.png?raw=true" width="450">
 </div>
 
 <div> 
-    <img src="https://github.com/priyanshugarg1010/flutter_corner_shape/blob/main/assets/per_corner.png" width="450">
+    <img src="https://github.com/priyanshugarg1010/flutter_corner_shape/blob/main/assets/per_corner.png?raw=true" width="450">
 </div>
 
 ## Why?
