@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.3
+
+### Added
+
+- Added the examples images in the readme file for better understanding the package really do
+
 ## 0.1.2
 
 ### Updated

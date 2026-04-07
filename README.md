@@ -2,6 +2,18 @@
 
 CSS `corner-shape` for Flutter. Round, scoop, bevel, notch, squircle, and superellipse corners — with per-corner control, smooth animations, and drop-in `ShapeBorder` + `Clipper` widgets.
 
+## Examples
+<table>
+  <tr>
+    <td><img src="assets/keyword_values.png" width="100%"/></td>
+    <td><img src="assets/morph.gif" width="100%"/></td>
+  </tr>
+  <tr>
+    <td><img src="assets/corner_clip.png" width="100%"/></td>
+    <td><img src="assets/per_corner.png" width="100%"/></td>
+  </tr>
+</table>
+
 ## Why?
 
 Flutter gives you `RoundedRectangleBorder` (round), `BeveledRectangleBorder` (bevel), and the new `RoundedSuperellipseBorder` (squircle). But there's no **scoop** (concave), no **notch** (inward square cut), no `superellipse(K)` fine-tuning, and no way to mix different shapes per corner.
