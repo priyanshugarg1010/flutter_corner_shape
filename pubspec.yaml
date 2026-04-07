@@ -3,7 +3,7 @@ description: >-
   CSS corner-shape for Flutter. Round, scoop, bevel, notch, squircle,
   and superellipse corners — per-corner control, smooth animations,
   and a drop-in ShapeBorder + Clipper.
-version: 0.1.3
+version: 0.1.4
 homepage: https://github.com/priyanshugarg1010/flutter_corner_shape
 repository: https://github.com/priyanshugarg1010/flutter_corner_shape
 issue_tracker: https://github.com/priyanshugarg1010/flutter_corner_shape/issues

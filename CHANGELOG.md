@@ -2,6 +2,12 @@
 
 ## 0.1.3
 
+### Updated
+
+- Updated the images to use the p tag in the read me file to show the images properly on pub dev
+
+## 0.1.3
+
 ### Added
 
 - Added the examples images in the readme file for better understanding the package really do
