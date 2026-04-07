@@ -1,6 +1,12 @@
 # Changelog
 
-## 0.1.3
+## 0.1.5
+
+### Updated
+
+- Updated the images to use the div tag in the read me file to show the images properly on pub dev
+
+## 0.1.4
 
 ### Updated
 
