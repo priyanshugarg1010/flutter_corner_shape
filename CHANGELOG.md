@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.6
+
+### Updated
+
+- Added the raw=true query parameter to render the images in the readme file
+
 ## 0.1.5
 
 ### Updated
