@@ -10,6 +10,8 @@ dependencies:
     sdk: flutter
   flutter_corner_shape:
     path: ../
+  # Added only for the side-by-side comparison page.
+  figma_squircle: ^0.6.3
 
 flutter:
   uses-material-design: true

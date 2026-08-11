@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_corner_shape/flutter_corner_shape.dart';
 
+import 'comparison_page.dart';
+
 void main() => runApp(const CornerShapeDemo());
 
 class CornerShapeDemo extends StatelessWidget {
@@ -14,7 +16,49 @@ class CornerShapeDemo extends StatelessWidget {
       theme: ThemeData.dark(useMaterial3: true).copyWith(
         scaffoldBackgroundColor: const Color(0xFF0c0c0f),
       ),
-      home: const DemoPage(),
+      home: const HomeShell(),
+    );
+  }
+}
+
+class HomeShell extends StatefulWidget {
+  const HomeShell({super.key});
+
+  @override
+  State<HomeShell> createState() => _HomeShellState();
+}
+
+class _HomeShellState extends State<HomeShell> {
+  int _index = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_index == 0 ? 'corner_shape' : 'vs figma_squircle'),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+      ),
+      body: IndexedStack(
+        index: _index,
+        children: const [DemoPage(), ComparisonPage()],
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _index,
+        onDestinationSelected: (i) => setState(() => _index = i),
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.widgets_outlined),
+            selectedIcon: Icon(Icons.widgets),
+            label: 'Showcase',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.compare_outlined),
+            selectedIcon: Icon(Icons.compare),
+            label: 'Comparison',
+          ),
+        ],
+      ),
     );
   }
 }
@@ -47,17 +91,11 @@ class _DemoPageState extends State<DemoPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('corner_shape'),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
             // ── Section 1: All keyword shapes ──────────────────────
             _sectionTitle('Keyword Values'),
             const SizedBox(height: 16),
@@ -91,6 +129,47 @@ class _DemoPageState extends State<DemoPage>
                 for (final k in [-3.0, -2.0, -1.0, -0.5, 0.0, 0.5, 1.0, 2.0, 3.0])
                   _superellipseBox(k),
               ],
+            ),
+
+            const SizedBox(height: 48),
+
+            // ── Section 2b: Figma corner smoothing (squircle) ─────
+            _sectionTitle('Corner Smoothing (Figma Squircle)'),
+            const SizedBox(height: 8),
+            Text(
+              'cornerSmoothing 0 (circular) → 1 (fully smooth)',
+              style: TextStyle(color: Colors.grey[600], fontSize: 13),
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                for (final s in [0.0, 0.3, 0.6, 1.0]) _smoothingBox(s),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Drop-in figma_squircle API (SmoothRectangleBorder):',
+              style: TextStyle(color: Colors.grey[600], fontSize: 13),
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: Container(
+                width: 200,
+                height: 120,
+                decoration: ShapeDecoration(
+                  color: const Color(0xFF60a5fa),
+                  shape: SmoothRectangleBorder(
+                    borderRadius: SmoothBorderRadius(
+                      cornerRadius: 30,
+                      cornerSmoothing: 0.6,
+                    ),
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: const Text('SmoothRectangleBorder'),
+              ),
             ),
 
             const SizedBox(height: 48),
@@ -251,7 +330,6 @@ class _DemoPageState extends State<DemoPage>
             const SizedBox(height: 80),
           ],
         ),
-      ),
     );
   }
 
@@ -326,6 +404,33 @@ class _DemoPageState extends State<DemoPage>
         const SizedBox(height: 6),
         Text(
           'K=$k',
+          style: TextStyle(
+            fontFamily: 'monospace',
+            fontSize: 10,
+            color: Colors.grey[600],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _smoothingBox(double smoothing) {
+    return Column(
+      children: [
+        Container(
+          width: 80,
+          height: 80,
+          decoration: ShapeDecoration(
+            color: const Color(0xFFa78bfa),
+            shape: CornerShapeBorder(
+              borderRadius: BorderRadius.circular(28),
+              cornerShape: CornerShapeSpec.smooth(cornerSmoothing: smoothing),
+            ),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          's=$smoothing',
           style: TextStyle(
             fontFamily: 'monospace',
             fontSize: 10,

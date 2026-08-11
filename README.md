@@ -30,6 +30,8 @@ CSS solved this with the `corner-shape` property. This package brings that full 
 
 - **6 keyword shapes**: `round`, `squircle`, `bevel`, `scoop`, `notch`, `square`
 - **`superellipse(K)`** for continuous fine-tuning from K = -∞ to +∞
+- **Figma corner smoothing**: real Figma "squircle" algorithm via `cornerSmoothing` (0–1)
+- **Drop-in `figma_squircle` replacement**: `SmoothRectangleBorder`, `SmoothBorderRadius`, `SmoothRadius`, `ClipSmoothRect`, `BorderAlign`
 - **Per-corner control**: different shape on each corner
 - **Smooth animation** between any two shapes via `CornerShapeSpecTween`
 - **`CornerShapeBorder`**: drop-in `ShapeBorder` for `ShapeDecoration`, `Material`, `Card`, etc.
@@ -89,6 +91,31 @@ CornerShapeBorder(
   borderRadius: BorderRadius.circular(24),
   cornerShape: CornerShapeSpec.all(
     CornerShapeValue.superellipse(-1.5), // between scoop and notch
+  ),
+)
+```
+
+### Corner smoothing (Figma squircle)
+
+Convex corners support Figma-style **corner smoothing** — the same model as the
+[`figma_squircle`](https://pub.dev/packages/figma_squircle) package. A
+`cornerSmoothing` of `0` is a plain circular corner; `0.6` matches Figma's
+default "smooth" preset; `1.0` is fully smooth (continuous curvature, iOS-like).
+
+```dart
+CornerShapeBorder(
+  borderRadius: BorderRadius.circular(24),
+  cornerShape: CornerShapeSpec.smooth(cornerSmoothing: 0.6),
+)
+
+// or per-corner, mixed with any other shape:
+CornerShapeBorder(
+  borderRadius: BorderRadius.circular(24),
+  cornerShape: CornerShapeSpec.only(
+    topLeft: CornerShapeValue.smooth(cornerSmoothing: 1.0),
+    topRight: CornerShapeValue.scoop,
+    bottomRight: CornerShapeValue.smooth(cornerSmoothing: 0.6),
+    bottomLeft: CornerShapeValue.bevel,
   ),
 )
 ```
@@ -162,6 +189,59 @@ Container(
 )
 ```
 
+## Replacing `figma_squircle`
+
+This package ships **drop-in replacements** for `figma_squircle`'s public API,
+backed by a faithful port of Figma's corner-smoothing algorithm. To migrate,
+change only the import:
+
+```diff
+- import 'package:figma_squircle/figma_squircle.dart';
++ import 'package:flutter_corner_shape/flutter_corner_shape.dart';
+```
+
+Everything else keeps working:
+
+```dart
+Container(
+  decoration: ShapeDecoration(
+    color: Colors.blue,
+    shape: SmoothRectangleBorder(
+      side: const BorderSide(color: Colors.black, width: 2),
+      borderRadius: SmoothBorderRadius(
+        cornerRadius: 20,
+        cornerSmoothing: 0.6,
+      ),
+    ),
+  ),
+)
+
+// Per-corner radii
+SmoothBorderRadius.only(
+  topLeft: SmoothRadius(cornerRadius: 20, cornerSmoothing: 1),
+  bottomRight: SmoothRadius(cornerRadius: 8, cornerSmoothing: 0.6),
+)
+
+// Clipping
+ClipSmoothRect(
+  radius: SmoothBorderRadius(cornerRadius: 24, cornerSmoothing: 0.6),
+  child: myWidget,
+)
+```
+
+| `figma_squircle`                     | `flutter_corner_shape`                       |
+| ------------------------------------ | -------------------------------------------- |
+| `SmoothRectangleBorder`              | `SmoothRectangleBorder` (same API)           |
+| `SmoothBorderRadius` / `.only` / …   | `SmoothBorderRadius` / `.only` / … (same)    |
+| `SmoothRadius`                       | `SmoothRadius` (same API)                     |
+| `ClipSmoothRect`                     | `ClipSmoothRect` (same API)                   |
+| `BorderAlign`                        | `BorderAlign` (same API)                      |
+
+The same smoothing is also available through the native API via
+`CornerShapeValue.smooth(cornerSmoothing:)` / `CornerShapeSpec.smooth(…)`,
+which additionally lets you mix smoothing with scoop/bevel/notch corners and
+animate the `cornerSmoothing` value.
+
 ## CSS ↔ Dart Mapping
 
 | CSS                                     | Dart                                                           |
@@ -175,6 +255,7 @@ Container(
 | `corner-shape: superellipse(-1.5)`      | `CornerShapeSpec.all(CornerShapeValue.superellipse(-1.5))`     |
 | `corner-shape: round scoop bevel notch` | `CornerShapeSpec.only(topLeft: .round, topRight: .scoop, ...)` |
 | `border-radius: 30px`                   | `BorderRadius.circular(30)`                                    |
+| _(Figma) smooth corner_                 | `CornerShapeSpec.smooth(cornerSmoothing: 0.6)`                 |
 
 ## Superellipse Value Spectrum
 
@@ -201,10 +282,15 @@ Container(
 | `CornerShapeDecoration` | Convenience `Decoration` (color + shape + shadows)     |
 | `CornerShapeSpecTween`  | `Tween` for animating between shapes                   |
 | `CornerShapeType`       | Enum of keyword values                                 |
+| `SmoothRectangleBorder` | Drop-in `figma_squircle` `ShapeBorder`                 |
+| `SmoothBorderRadius`    | Drop-in `figma_squircle` per-corner smooth radii       |
+| `SmoothRadius`          | Drop-in `figma_squircle` radius + `cornerSmoothing`    |
+| `ClipSmoothRect`        | Drop-in `figma_squircle` clip widget                   |
+| `SmoothCornerGeometry`  | Low-level Figma smoothing math (control points)        |
 
 ## How It Works
 
-The package uses cubic Bézier curves to approximate superellipse corners:
+For superellipse corners, the package uses cubic Bézier curves:
 
 - **Convex (K > 0)**: Control points placed between edge start/end and corner, with handle length derived from K
 - **Bevel (K = 0)**: Straight line between edges
@@ -213,6 +299,12 @@ The package uses cubic Bézier curves to approximate superellipse corners:
 - **Notch (K = -∞)**: Two straight lines to an inward-reflected point
 
 For K = 1 (standard round), the Bézier handle factor is the classic `(4/3)(√2 - 1) ≈ 0.5523`, matching a perfect circular arc.
+
+**Corner smoothing** uses a different model — a faithful port of
+[Figma's corner-smoothing algorithm](https://www.figma.com/blog/desperately-seeking-squircles/).
+Each smooth corner is built from a central circular arc flanked by two cubic
+Bézier segments whose control points (`a, b, c, d, p`) are derived from the
+`cornerSmoothing` factor, producing the same result as `figma_squircle`.
 
 ## License
 

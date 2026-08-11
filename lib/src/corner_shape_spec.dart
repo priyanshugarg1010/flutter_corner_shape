@@ -102,6 +102,16 @@ class CornerShapeSpec {
   /// All corners are square (no rounding).
   static const square = CornerShapeSpec.all(CornerShapeValue.square);
 
+  /// All corners use Figma's default smooth (squircle) corner
+  /// (`cornerSmoothing = 0.6`).
+  static const smoothSquircle =
+      CornerShapeSpec.all(CornerShapeValue.smoothSquircle);
+
+  /// Creates a [CornerShapeSpec] whose corners are Figma-style smooth
+  /// corners with the given [cornerSmoothing] (0..1).
+  CornerShapeSpec.smooth({double cornerSmoothing = 0.6})
+      : this.all(CornerShapeValue.smooth(cornerSmoothing: cornerSmoothing));
+
   /// Linearly interpolates between two [CornerShapeSpec]s.
   static CornerShapeSpec lerp(CornerShapeSpec a, CornerShapeSpec b, double t) {
     return CornerShapeSpec.only(

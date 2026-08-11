@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.2.0
+
+### Added
+
+- **Figma corner smoothing**: convex corners now support a `cornerSmoothing`
+  factor (0–1) using a faithful port of Figma's corner-smoothing ("squircle")
+  algorithm.
+  - `CornerShapeValue.smooth(cornerSmoothing:)` and `CornerShapeValue.superellipse(k, cornerSmoothing:)`
+  - `CornerShapeSpec.smooth(cornerSmoothing:)` and `CornerShapeSpec.smoothSquircle`
+  - `cornerSmoothing` animates via `CornerShapeSpec.lerp` / `CornerShapeSpecTween`
+  - Smoothing can be mixed per-corner with scoop / bevel / notch corners
+- **Drop-in `figma_squircle` replacement**: change only the import to migrate.
+  - `SmoothRectangleBorder` (with `BorderAlign`)
+  - `SmoothBorderRadius` (`.only`, `.all`, `.vertical`, `.horizontal`, operators, `lerp`, `copyWith`)
+  - `SmoothRadius`
+  - `ClipSmoothRect`
+- `SmoothCornerGeometry`: low-level, cached Figma-smoothing math.
+
 ## 0.1.6
 
 ### Updated

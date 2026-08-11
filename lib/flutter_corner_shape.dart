@@ -4,6 +4,11 @@
 /// corner shapes — with per-corner control, smooth animations, and drop-in
 /// [ShapeBorder] + [Clipper] widgets.
 ///
+/// Convex corners also support Figma-style corner smoothing via
+/// `CornerShapeValue.smooth(cornerSmoothing:)`, and the package ships drop-in
+/// replacements for the `figma_squircle` API ([SmoothRectangleBorder],
+/// [SmoothBorderRadius], [SmoothRadius], [ClipSmoothRect]).
+///
 /// ## Quick Start
 ///
 /// ```dart
@@ -36,8 +41,13 @@
 library;
 
 export 'src/clip_corner_shape.dart';
+export 'src/clip_smooth_rect.dart';
 export 'src/corner_shape_border.dart';
 export 'src/corner_shape_decoration.dart';
 export 'src/corner_shape_spec.dart';
 export 'src/corner_shape_tween.dart';
 export 'src/corner_shape_value.dart';
+export 'src/smooth_border_radius.dart';
+export 'src/smooth_corner_geometry.dart';
+export 'src/smooth_radius.dart';
+export 'src/smooth_rectangle_border.dart';

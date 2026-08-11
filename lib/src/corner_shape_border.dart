@@ -1,9 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
+import 'dart:math' as math;
+
 import 'corner_path_builder.dart';
 import 'corner_shape_spec.dart';
 import 'corner_shape_value.dart';
+import 'smooth_corner_geometry.dart';
 
 /// A [ShapeBorder] that applies CSS-style corner shapes to a rectangle.
 ///
@@ -211,66 +214,58 @@ class CornerShapeBorder extends OutlinedBorder {
     // Clamp radii to avoid overlap (CSS collision rules)
     final clampedBR = _clampRadii(rect, br);
 
-    final tlR = clampedBR.topLeft;
-    final trR = clampedBR.topRight;
-    final brR = clampedBR.bottomRight;
-    final blR = clampedBR.bottomLeft;
-
-    // ── Top-left corner ─────────────────────────────────────────────
-    final tlStart = Offset(rect.left, rect.top + tlR.y);
-    final tlCorner = Offset(rect.left, rect.top);
-    final tlEnd = Offset(rect.left + tlR.x, rect.top);
-
-    path.moveTo(tlStart.dx, tlStart.dy);
-    CornerPathBuilder.addCorner(
-      path,
-      cornerPoint: tlCorner,
-      startPoint: tlStart,
-      endPoint: tlEnd,
+    // Resolve each corner into a local frame with its two along-edge insets.
+    // `e1` points from the corner toward the incoming edge, `e2` toward the
+    // outgoing edge (following the path's clockwise winding).
+    final tl = _Corner(
+      corner: Offset(rect.left, rect.top),
+      e1: const Offset(0, 1),
+      e2: const Offset(1, 0),
+      radius: clampedBR.topLeft,
+      inset1: clampedBR.topLeft.y,
+      inset2: clampedBR.topLeft.x,
       value: cornerShape.topLeft,
+      rect: rect,
     );
-
-    // ── Top-right corner ────────────────────────────────────────────
-    final trStart = Offset(rect.right - trR.x, rect.top);
-    final trCorner = Offset(rect.right, rect.top);
-    final trEnd = Offset(rect.right, rect.top + trR.y);
-
-    path.lineTo(trStart.dx, trStart.dy);
-    CornerPathBuilder.addCorner(
-      path,
-      cornerPoint: trCorner,
-      startPoint: trStart,
-      endPoint: trEnd,
+    final tr = _Corner(
+      corner: Offset(rect.right, rect.top),
+      e1: const Offset(-1, 0),
+      e2: const Offset(0, 1),
+      radius: clampedBR.topRight,
+      inset1: clampedBR.topRight.x,
+      inset2: clampedBR.topRight.y,
       value: cornerShape.topRight,
+      rect: rect,
     );
-
-    // ── Bottom-right corner ─────────────────────────────────────────
-    final brStart = Offset(rect.right, rect.bottom - brR.y);
-    final brCorner = Offset(rect.right, rect.bottom);
-    final brEnd = Offset(rect.right - brR.x, rect.bottom);
-
-    path.lineTo(brStart.dx, brStart.dy);
-    CornerPathBuilder.addCorner(
-      path,
-      cornerPoint: brCorner,
-      startPoint: brStart,
-      endPoint: brEnd,
+    final brc = _Corner(
+      corner: Offset(rect.right, rect.bottom),
+      e1: const Offset(0, -1),
+      e2: const Offset(-1, 0),
+      radius: clampedBR.bottomRight,
+      inset1: clampedBR.bottomRight.y,
+      inset2: clampedBR.bottomRight.x,
       value: cornerShape.bottomRight,
+      rect: rect,
     );
-
-    // ── Bottom-left corner ──────────────────────────────────────────
-    final blStart = Offset(rect.left + blR.x, rect.bottom);
-    final blCorner = Offset(rect.left, rect.bottom);
-    final blEnd = Offset(rect.left, rect.bottom - blR.y);
-
-    path.lineTo(blStart.dx, blStart.dy);
-    CornerPathBuilder.addCorner(
-      path,
-      cornerPoint: blCorner,
-      startPoint: blStart,
-      endPoint: blEnd,
+    final bl = _Corner(
+      corner: Offset(rect.left, rect.bottom),
+      e1: const Offset(1, 0),
+      e2: const Offset(0, -1),
+      radius: clampedBR.bottomLeft,
+      inset1: clampedBR.bottomLeft.x,
+      inset2: clampedBR.bottomLeft.y,
       value: cornerShape.bottomLeft,
+      rect: rect,
     );
+
+    path.moveTo(tl.start.dx, tl.start.dy);
+    tl.draw(path);
+    path.lineTo(tr.start.dx, tr.start.dy);
+    tr.draw(path);
+    path.lineTo(brc.start.dx, brc.start.dy);
+    brc.draw(path);
+    path.lineTo(bl.start.dx, bl.start.dy);
+    bl.draw(path);
 
     path.close();
     return path;
@@ -338,5 +333,71 @@ class CornerShapeBorder extends OutlinedBorder {
         'side: $side, '
         'borderRadius: $borderRadius, '
         'cornerShape: $cornerShape)';
+  }
+}
+
+/// Internal helper describing one corner in a local frame, resolving its
+/// start/end points and dispatching to the right [CornerPathBuilder] routine.
+class _Corner {
+  _Corner({
+    required this.corner,
+    required this.e1,
+    required this.e2,
+    required this.radius,
+    required this.inset1,
+    required this.inset2,
+    required this.value,
+    required this.rect,
+  }) {
+    if (value.isSmooth && radius.x > 0 && radius.y > 0) {
+      // Figma smoothing operates on circular radii; use the smaller axis.
+      final r = math.min(radius.x, radius.y);
+      _geometry = SmoothCornerGeometry(
+        cornerRadius: r,
+        cornerSmoothing: value.cornerSmoothing,
+        width: rect.width,
+        height: rect.height,
+      );
+      // Straight edges end at distance `p` from the corner for smooth corners.
+      start = corner + e1 * _geometry!.p;
+      end = corner + e2 * _geometry!.p;
+    } else {
+      start = corner + e1 * inset1;
+      end = corner + e2 * inset2;
+    }
+  }
+
+  final Offset corner;
+  final Offset e1;
+  final Offset e2;
+  final Radius radius;
+  final double inset1;
+  final double inset2;
+  final CornerShapeValue value;
+  final Rect rect;
+
+  SmoothCornerGeometry? _geometry;
+  late final Offset start;
+  late final Offset end;
+
+  void draw(Path path) {
+    final geometry = _geometry;
+    if (geometry != null) {
+      CornerPathBuilder.addSmoothCorner(
+        path,
+        cornerPoint: corner,
+        startPoint: start,
+        endPoint: end,
+        geometry: geometry,
+      );
+    } else {
+      CornerPathBuilder.addCorner(
+        path,
+        cornerPoint: corner,
+        startPoint: start,
+        endPoint: end,
+        value: value,
+      );
+    }
   }
 }

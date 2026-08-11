@@ -33,7 +33,7 @@ enum CornerShapeType {
 }
 
 /// A value representing the curvature of a corner, modeled after the CSS
-/// `superellipse()` function.
+/// `superellipse()` function, with optional Figma-style [cornerSmoothing].
 ///
 /// Positive values curve outward (1 = round, 2 = squircle, ∞ = square).
 /// Zero gives a straight bevel. Negative values curve inward
@@ -46,6 +46,22 @@ enum CornerShapeType {
 /// // CSS:   corner-shape: scoop;
 /// // Dart:  CornerShapeValue.scoop
 /// ```
+///
+/// ## Corner smoothing (Figma squircles)
+///
+/// For convex corners you can additionally apply [cornerSmoothing] (0..1),
+/// which renders the corner using Figma's corner-smoothing algorithm instead
+/// of the superellipse Bézier. This is the same model used by the
+/// `figma_squircle` package — a value of `0` is a plain circular corner and
+/// `0.6` matches Figma's default "smooth" corner.
+///
+/// ```dart
+/// // Figma default smooth corner
+/// CornerShapeValue.smooth(cornerSmoothing: 0.6)
+///
+/// // Fully smooth (iOS-like)
+/// CornerShapeValue.smooth(cornerSmoothing: 1.0)
+/// ```
 class CornerShapeValue {
   /// The superellipse exponent K.
   ///
@@ -56,12 +72,31 @@ class CornerShapeValue {
   /// - `K == double.negativeInfinity`: notch (90° inward cut)
   final double k;
 
-  /// Creates a corner shape value with the given superellipse exponent [k].
-  const CornerShapeValue.superellipse(this.k);
+  /// Figma-style corner smoothing, in the range `0..1`.
+  ///
+  /// Only applies to convex corners ([isConvex]). When greater than zero the
+  /// corner is rendered with Figma's corner-smoothing algorithm rather than
+  /// the raw superellipse curve:
+  ///
+  /// - `0`: a plain circular/superellipse corner (default).
+  /// - `0.6`: Figma's default "smooth" preset.
+  /// - `1.0`: maximum smoothing (iOS-like continuous curvature).
+  final double cornerSmoothing;
+
+  /// Creates a corner shape value with the given superellipse exponent [k]
+  /// and optional [cornerSmoothing].
+  const CornerShapeValue.superellipse(this.k, {this.cornerSmoothing = 0});
+
+  /// Creates a Figma-style smooth (squircle) corner.
+  ///
+  /// This is a round corner (`K = 1`) with the given [cornerSmoothing]
+  /// (0..1). Equivalent to `figma_squircle`'s `cornerSmoothing`.
+  const CornerShapeValue.smooth({this.cornerSmoothing = 0.6}) : k = 1.0;
 
   /// Creates a corner shape value from a [CornerShapeType] keyword.
   CornerShapeValue.fromType(CornerShapeType type)
-      : k = switch (type) {
+      : cornerSmoothing = 0,
+        k = switch (type) {
           CornerShapeType.round => 1.0,
           CornerShapeType.squircle => 2.0,
           CornerShapeType.bevel => 0.0,
@@ -90,7 +125,19 @@ class CornerShapeValue {
   /// No rounding at all. `K = +∞`.
   static const square = CornerShapeValue.superellipse(double.infinity);
 
+  /// Figma's default smooth corner (`cornerSmoothing = 0.6`).
+  static const smoothSquircle = CornerShapeValue.smooth();
+
   // ── Helpers ─────────────────────────────────────────────────────────
+
+  /// Returns a copy of this value with the given [cornerSmoothing].
+  CornerShapeValue withCornerSmoothing(double cornerSmoothing) =>
+      CornerShapeValue.superellipse(k, cornerSmoothing: cornerSmoothing);
+
+  /// Whether this corner should be rendered with Figma corner smoothing.
+  ///
+  /// True only for convex corners with a non-zero [cornerSmoothing].
+  bool get isSmooth => cornerSmoothing > 0 && isConvex;
 
   /// Whether this corner has outward curvature (K > 0, finite).
   bool get isConvex => k > 0 && k.isFinite;
@@ -121,7 +168,10 @@ class CornerShapeValue {
     const maxK = 100.0;
     final aK = a.k.clamp(-maxK, maxK);
     final bK = b.k.clamp(-maxK, maxK);
-    return CornerShapeValue.superellipse(lerpDouble(aK, bK, t)!);
+    return CornerShapeValue.superellipse(
+      lerpDouble(aK, bK, t)!,
+      cornerSmoothing: lerpDouble(a.cornerSmoothing, b.cornerSmoothing, t)!,
+    );
   }
 
   @override
@@ -129,19 +179,25 @@ class CornerShapeValue {
       identical(this, other) ||
       other is CornerShapeValue &&
           runtimeType == other.runtimeType &&
-          k == other.k;
+          k == other.k &&
+          cornerSmoothing == other.cornerSmoothing;
 
   @override
-  int get hashCode => k.hashCode;
+  int get hashCode => Object.hash(k, cornerSmoothing);
 
   @override
   String toString() {
+    final smoothing =
+        cornerSmoothing > 0 ? ', cornerSmoothing: $cornerSmoothing' : '';
+    if (cornerSmoothing > 0 && k == 1.0) {
+      return 'CornerShapeValue.smooth(cornerSmoothing: $cornerSmoothing)';
+    }
     if (k == double.infinity) return 'CornerShapeValue.square';
     if (k == double.negativeInfinity) return 'CornerShapeValue.notch';
-    if (k == 1.0) return 'CornerShapeValue.round';
-    if (k == 2.0) return 'CornerShapeValue.squircle';
+    if (k == 1.0) return 'CornerShapeValue.round$smoothing';
+    if (k == 2.0) return 'CornerShapeValue.squircle$smoothing';
     if (k == 0.0) return 'CornerShapeValue.bevel';
     if (k == -1.0) return 'CornerShapeValue.scoop';
-    return 'CornerShapeValue.superellipse($k)';
+    return 'CornerShapeValue.superellipse($k$smoothing)';
   }
 }

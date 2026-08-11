@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'corner_shape_value.dart';
+import 'smooth_corner_geometry.dart';
 
 /// Generates [Path] segments for a single corner based on its [CornerShapeValue].
 ///
@@ -92,6 +93,74 @@ class CornerPathBuilder {
       );
       path.cubicTo(cp1.dx, cp1.dy, cp2.dx, cp2.dy, endPoint.dx, endPoint.dy);
     }
+  }
+
+  /// Adds a Figma-style *smooth* corner to [path].
+  ///
+  /// Unlike [addCorner], a smooth corner's straight edges end at distance
+  /// [SmoothCornerGeometry.p] from [cornerPoint] (which is `>=` the corner
+  /// radius), so [startPoint] and [endPoint] here must already be positioned
+  /// at that distance along each edge. The path's current position should be
+  /// at [startPoint] before calling.
+  ///
+  /// The curve is drawn as: cubic Bézier → central circular arc → cubic
+  /// Bézier, matching the geometry described by [SmoothCornerGeometry].
+  static void addSmoothCorner(
+    Path path, {
+    required Offset cornerPoint,
+    required Offset startPoint,
+    required Offset endPoint,
+    required SmoothCornerGeometry geometry,
+  }) {
+    final p = geometry.p;
+    if (p <= 0) {
+      // Degenerate (zero radius): behave like a sharp corner.
+      path.lineTo(cornerPoint.dx, cornerPoint.dy);
+      path.lineTo(endPoint.dx, endPoint.dy);
+      return;
+    }
+
+    // Orthonormal local frame: e1 points from the corner toward startPoint,
+    // e2 toward endPoint. `point(s1, s2)` maps local distances back to global
+    // coordinates: corner + e1*s1 + e2*s2.
+    final e1 = _unit(startPoint - cornerPoint);
+    final e2 = _unit(endPoint - cornerPoint);
+    Offset point(double s1, double s2) =>
+        cornerPoint + e1 * s1 + e2 * s2;
+
+    final a = geometry.a;
+    final b = geometry.b;
+    final c = geometry.c;
+    final d = geometry.d;
+    final r = geometry.cornerRadius;
+
+    // Determine arc sweep direction from the handedness of (e1, e2).
+    final clockwise = (e1.dx * e2.dy - e1.dy * e2.dx) < 0;
+
+    final arcStart = point(p - a - b - c, d);
+    final arcEnd = point(d, p - a - b - c);
+
+    path.cubicTo(
+      point(p - a, 0).dx, point(p - a, 0).dy,
+      point(p - a - b, 0).dx, point(p - a - b, 0).dy,
+      arcStart.dx, arcStart.dy,
+    );
+    path.arcToPoint(
+      arcEnd,
+      radius: Radius.circular(r),
+      clockwise: clockwise,
+    );
+    path.cubicTo(
+      point(0, p - a - b).dx, point(0, p - a - b).dy,
+      point(0, p - a).dx, point(0, p - a).dy,
+      endPoint.dx, endPoint.dy,
+    );
+  }
+
+  static Offset _unit(Offset v) {
+    final len = v.distance;
+    if (len == 0) return Offset.zero;
+    return v / len;
   }
 
   /// Compute the control point factor for convex superellipse curves.
