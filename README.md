@@ -9,6 +9,10 @@ CSS `corner-shape` for Flutter. Round, scoop, bevel, notch, squircle, and supere
 </div>
 
 <div> 
+    <img src="https://github.com/priyanshugarg1010/flutter_corner_shape/blob/main/assets/figma_squircle.png?raw=true" width="450">
+</div>
+
+<div> 
     <img src="https://github.com/priyanshugarg1010/flutter_corner_shape/blob/main/assets/morph.gif?raw=true" width="450">
 </div>
 
